@@ -1,11 +1,13 @@
+import Header from "@/components/header";
 import TeamGrid from "@/components/team-grid";
-import TeamGridSkeleton from "@/components/team-grid-skeleton";
 import UniquePlayerGrid from "@/components/unique-player-grid";
 import { getClassicLeague, getCurrentEvent } from "@/utils/db";
+import { searchParamsCache } from "@/utils/parser";
 import type { Manager } from "@/utils/type";
-import { Suspense } from "react";
 
-export default async function Home() {
+export default async function Home(props: PageProps<"/">) {
+  const params = await searchParamsCache.parse(props.searchParams);
+
   const { id: currentEventId } = await getCurrentEvent();
 
   const {
@@ -24,15 +26,16 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen items-stretch justify-stretch bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen min-w-full flex-col items-stretch justify-stretch py-32 px-16 bg-white dark:bg-black">
-        <Suspense fallback={<div>Loading Unique Players...</div>}>
+        <div className="flex flex-col items-stretch justify-start gap-4">
+          <Header />
           <UniquePlayerGrid
             managers={managers}
             currentEventId={currentEventId}
+            params={params}
           />
-        </Suspense>
-        <Suspense fallback={<TeamGridSkeleton />}>
+
           <TeamGrid managers={managers} currentEventId={currentEventId} />
-        </Suspense>
+        </div>
       </main>
     </div>
   );

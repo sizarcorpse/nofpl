@@ -3,13 +3,18 @@ import { API_ENDPOINTS } from "@/utils/data";
 import { createCacheKey } from "@/utils/utils";
 
 export async function getBootstrap() {
+  let hit = false;
   return await cache(
     async () => {
       const response = await fetch(`${API_ENDPOINTS}/bootstrap-static/`);
 
+      hit = true;
+
       if (!response.ok) {
         throw new Error("Failed to fetch bootstrap data");
       }
+
+      console.log(`[cache] bootstrap-static hit: ${hit}`);
       return await response.json();
     },
     [JSON.stringify("bootstrap")],
@@ -24,15 +29,21 @@ export async function getEntryPicks({
   entryId: number;
   eventId: number;
 }) {
+  let hit = false;
+
   return await cache(
     async () => {
       const response = await fetch(
         `${API_ENDPOINTS}/entry/${entryId}/event/${eventId}/picks`
       );
 
+      hit = true;
+
       if (!response.ok) {
         throw new Error("Failed to fetch entry picks data");
       }
+
+      console.log(`[cache] entryPicks hit: ${hit}`);
 
       return await response.json();
     },
@@ -106,15 +117,21 @@ export async function getClassicLeague({
   newEntries: number;
   phase: number;
 }) {
+  let hit = false;
+
   return await cache(
     async () => {
       const response = await fetch(
         `${API_ENDPOINTS}/leagues-classic/${leagueId}/standings/?page_new_entries=${newEntries}&page_standings=${page}&phase=${phase}`
       );
 
+      hit = true;
+
       if (!response.ok) {
         throw new Error("Failed to fetch classic league");
       }
+
+      console.log(`[cache] classic-league hit: ${hit}`);
 
       return await response.json();
     },

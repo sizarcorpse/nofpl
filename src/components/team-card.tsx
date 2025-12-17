@@ -6,7 +6,7 @@ interface TeamCardProps {
   team: Team;
 }
 
-const TeamCard = async (props: TeamCardProps) => {
+const TeamCard = (props: TeamCardProps) => {
   const {
     team: { manager, players },
   } = props;

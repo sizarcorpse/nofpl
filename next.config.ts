@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
       new URL("https://resources.premierleague.com/**"),
     ],
   },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
 };
 
 export default nextConfig;
