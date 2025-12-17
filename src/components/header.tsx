@@ -1,5 +1,6 @@
 "use client";
 
+import ThemeToggle from "@/components/theme-toggle";
 import {
   Select,
   SelectContent,
@@ -22,7 +23,7 @@ const Header = () => {
   };
 
   return (
-    <div className="flex items-center justify-end w-full">
+    <div className="flex items-center justify-end w-full gap-2">
       <Select value={sort || "club"} onValueChange={handleSortChange}>
         <SelectTrigger className="w-45">
           <SelectValue placeholder="Sort" />
@@ -33,6 +34,8 @@ const Header = () => {
           <SelectItem value="club">Club</SelectItem>
         </SelectContent>
       </Select>
+
+      <ThemeToggle />
     </div>
   );
 };
