@@ -22,7 +22,7 @@ const UniquePlayerSort = () => {
   };
 
   return (
-    <Select value={sort} onValueChange={handleSortChange}>
+    <Select value={sort || "club"} onValueChange={handleSortChange}>
       <SelectTrigger className="w-45">
         <SelectValue placeholder="Sort" />
       </SelectTrigger>

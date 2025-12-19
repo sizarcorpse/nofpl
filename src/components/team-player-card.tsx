@@ -1,12 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Item, ItemContent, ItemMedia } from "@/components/ui/item";
 import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
 import type { Player, Team } from "@/utils/type";
 import Image from "next/image";
@@ -14,7 +7,7 @@ interface TeamCardProps {
   player: Player;
 }
 
-const PlayerCard = (props: TeamCardProps) => {
+const TeamPlayerCard = (props: TeamCardProps) => {
   const { player } = props;
 
   const image = `https://resources.premierleague.com/premierleague25/photos/players/110x140/${player.code}.png`;
@@ -64,4 +57,4 @@ const PlayerCard = (props: TeamCardProps) => {
   );
 };
 
-export default PlayerCard;
+export default TeamPlayerCard;

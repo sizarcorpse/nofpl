@@ -40,9 +40,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
-            {teams}
-            {players}
+            <div className="flex min-h-screen items-stretch justify-stretch bg-background">
+              <main className="flex min-h-screen min-w-full flex-col items-stretch justify-stretch py-32 px-8 gap-8">
+                <Header />
+                {players}
+                {teams}
+              </main>
+            </div>
           </ThemeProvider>
         </NuqsAdapter>
       </body>

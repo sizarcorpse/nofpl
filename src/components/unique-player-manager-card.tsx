@@ -10,7 +10,7 @@ interface ManagerCardProps {
   manager: Manager;
 }
 
-const ManagerCard = ({ manager }: ManagerCardProps) => {
+const UniquePlayerManagerCard = ({ manager }: ManagerCardProps) => {
   return (
     <Item className="py-2 px-2" size="sm" variant="muted">
       <ItemContent>
@@ -33,4 +33,4 @@ const ManagerCard = ({ manager }: ManagerCardProps) => {
   );
 };
 
-export default ManagerCard;
+export default UniquePlayerManagerCard;

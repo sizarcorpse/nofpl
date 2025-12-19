@@ -1,7 +1,6 @@
-import ManagerCard from "@/components/manager-card";
 import TeamCard from "@/components/team-card";
-import { getElements, getEntryPicks, getPlayers } from "@/utils/db";
-import type { Manager, Managers, Player, Players, Teams } from "@/utils/type";
+import { getPlayers } from "@/utils/db";
+import type { Managers } from "@/utils/type";
 
 interface TeamGridProps {
   managers: Managers;

@@ -18,9 +18,5 @@ export default async function TeamsPage(props: PageProps<"/">) {
     };
   };
 
-  return (
-    <div>
-      <TeamGrid managers={managers} currentEventId={currentEventId} />
-    </div>
-  );
+  return <TeamGrid managers={managers} currentEventId={currentEventId} />;
 }
