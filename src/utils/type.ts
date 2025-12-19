@@ -35,5 +35,6 @@ export type Teams = Team[];
 
 export type UniquePlayerManager = {
   player: Player;
-  managers: Manager[];
+  associated: Manager[];
+  dropped: Manager[];
 };

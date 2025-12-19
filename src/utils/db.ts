@@ -1,5 +1,13 @@
 import { unstable_cache as cache } from "@/libs/next/unstable-cache";
 import { API_ENDPOINTS } from "@/utils/data";
+import type { SearchParams } from "@/utils/parser";
+import {
+  Manager,
+  Managers,
+  Player,
+  Teams,
+  UniquePlayerManager,
+} from "@/utils/type";
 import { createCacheKey } from "@/utils/utils";
 
 export async function getBootstrap() {
@@ -152,4 +160,136 @@ export async function getClassicLeague({
       ],
     }
   )();
+}
+
+export async function getUniquePlayers({
+  currentEventId,
+  managers,
+  params,
+}: {
+  currentEventId: number;
+  managers: Managers;
+  params: SearchParams;
+}) {
+  try {
+    const picksPromises = managers.map((manager: Manager) =>
+      getEntryPicks({
+        entryId: manager.entry,
+        eventId: currentEventId,
+      })
+    );
+
+    const picksResults = await Promise.all(picksPromises);
+
+    const playerIds = picksResults.flatMap((result) =>
+      result.picks.map((pick: { element: number }) => pick.element)
+    );
+
+    const playerIdMap = Array.from(new Set(playerIds)).sort((a, b) => a - b);
+    const players = await getElements({ elementIds: playerIdMap });
+    const playersMap = new Map(players.map((el: Player) => [el.id, el]));
+
+    let result: UniquePlayerManager[] = playerIdMap
+      .map((playerId) => {
+        const player = playersMap.get(playerId);
+
+        if (!player) return null;
+
+        const associated = picksResults
+          .map((res, idx) =>
+            res.picks.some(
+              (pick: { element: number }) => pick.element === playerId
+            )
+              ? managers[idx]
+              : null
+          )
+          .filter((m): m is Manager => m !== null)
+          .sort((a, b) => a.entry - b.entry);
+
+        const dropped = managers
+          .filter((m) => !associated.some((a) => a.entry === m.entry))
+          .sort((a, b) => a.entry - b.entry);
+
+        return { player, associated, dropped };
+      })
+      .filter((item): item is UniquePlayerManager => item !== null);
+
+    if (params.search && params.search.trim() !== "") {
+      const searchTerm = params.search.toLowerCase().trim();
+
+      result = result.filter(({ player }) => {
+        const fullName =
+          `${player.first_name} ${player.second_name}`.toLowerCase();
+        const webName = player.web_name.toLowerCase();
+
+        return fullName.includes(searchTerm) || webName.includes(searchTerm);
+      });
+    }
+
+    if (params.sort === "element-type") {
+      result = result.sort(
+        (a, b) =>
+          a.player.element_type - b.player.element_type ||
+          a.player.id - b.player.id
+      );
+    } else if (params.sort === "most-picked") {
+      result = result.sort(
+        (a, b) =>
+          b.associated.length - a.associated.length || a.player.id - b.player.id
+      );
+    } else if (params.sort === "club") {
+      result = result.sort(
+        (a, b) => a.player.team - b.player.team || a.player.id - b.player.id
+      );
+    } else {
+      result = result.sort((a, b) => a.player.id - b.player.id);
+    }
+
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to get unique players data: ${error}`);
+  }
+}
+export async function getPlayers({
+  currentEventId,
+  managers,
+}: {
+  currentEventId: number;
+  managers: Managers;
+}) {
+  try {
+    const picksPromises = managers.map((manager: Manager) =>
+      getEntryPicks({
+        entryId: manager.entry,
+        eventId: currentEventId,
+      })
+    );
+
+    const picksResults = await Promise.all(picksPromises);
+
+    const playerIds = picksResults.flatMap((result) =>
+      result.picks.map((pick: { element: number }) => pick.element)
+    );
+
+    const playerIdMap = Array.from(new Set(playerIds)).sort((a, b) => a - b);
+    const players = await getElements({ elementIds: playerIdMap });
+    const playersMap = new Map(players.map((el: Player) => [el.id, el]));
+
+    const result: Teams = managers.map((manager: Manager, index: number) => {
+      const picks = picksResults[index].picks;
+
+      const players = picks
+        .map((pick: { element: number }) => playersMap.get(pick.element))
+        .filter(Boolean) as Player[];
+
+      return {
+        manager: manager,
+        players: players,
+      };
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to get unique players data: ${error}`);
+  }
 }

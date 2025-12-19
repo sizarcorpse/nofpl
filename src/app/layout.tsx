@@ -1,7 +1,9 @@
+import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import React from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,9 +22,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  players,
+  teams,
 }: Readonly<{
-  children: React.ReactNode;
+  players: React.ReactNode;
+  teams: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -36,7 +40,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <Header />
+            {teams}
+            {players}
           </ThemeProvider>
         </NuqsAdapter>
       </body>

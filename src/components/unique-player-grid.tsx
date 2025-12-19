@@ -1,106 +1,39 @@
+import ManagerCard from "@/components/manager-card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ItemGroup } from "@/components/ui/item";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
-import { getElements, getEntryPicks } from "@/utils/db";
-import type { SearchParams } from "@/utils/parser";
-import type {
-  Manager,
-  Managers,
-  Player,
-  UniquePlayerManager,
-} from "@/utils/type";
+import type { UniquePlayerManager } from "@/utils/type";
 import Image from "next/image";
 
 interface UniquePlayerGridProps {
-  managers: Managers;
-  currentEventId: number;
-  params: SearchParams;
+  players: UniquePlayerManager[];
 }
 
 const UniquePlayerGrid = async (props: UniquePlayerGridProps) => {
-  const { managers, currentEventId, params } = props;
-
-  const picksPromises = managers.map((manager: Manager) =>
-    getEntryPicks({
-      entryId: manager.entry,
-      eventId: currentEventId,
-    })
-  );
-
-  const picksResults = await Promise.all(picksPromises);
-
-  const playerIds = picksResults.flatMap((result) =>
-    result.picks.map((pick: { element: number }) => pick.element)
-  );
-
-  const playerIdMap = Array.from(new Set(playerIds)).sort((a, b) => a - b);
-  const players = await getElements({ elementIds: playerIdMap });
-  const playersMap = new Map(players.map((el: Player) => [el.id, el]));
-
-  let result: UniquePlayerManager[] = playerIdMap
-    .map((playerId) => {
-      const player = playersMap.get(playerId);
-
-      if (!player) return null;
-
-      const associated = picksResults
-        .map((res, idx) =>
-          res.picks.some(
-            (pick: { element: number }) => pick.element === playerId
-          )
-            ? managers[idx]
-            : null
-        )
-        .filter((m): m is Manager => m !== null)
-        .sort((a, b) => a.entry - b.entry);
-
-      return { player, managers: associated };
-    })
-    .filter((item): item is UniquePlayerManager => item !== null);
-
-  if (params.sort === "element-type") {
-    result = result.sort(
-      (a, b) =>
-        a.player.element_type - b.player.element_type ||
-        a.player.id - b.player.id
-    );
-  } else if (params.sort === "most-picked") {
-    result = result.sort(
-      (a, b) =>
-        b.managers.length - a.managers.length || a.player.id - b.player.id
-    );
-  } else if (params.sort === "club" || params.sort === undefined) {
-    result = result.sort(
-      (a, b) => a.player.team - b.player.team || a.player.id - b.player.id
-    );
-  } else {
-    result = result.sort((a, b) => a.player.id - b.player.id);
-  }
+  const { players } = props;
 
   return (
-    <div className="grid grid-cols-1 gap-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {result.map(({ player, managers }) => (
-        <div
-          key={player.id}
-          className="relative grid grid-cols-[110px_1fr] gap-4 border border-zinc-900 p-4 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-        >
-          <Image
-            src={`https://resources.premierleague.com/premierleague25/photos/players/110x140/${player.code}.png`}
-            alt={player.web_name}
-            width={110}
-            height={140}
-            unoptimized
-          />
+    <div className="grid grid-cols-1 gap-2 content-start md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {players.map(({ player, associated, dropped }) => (
+        <Card key={player.id} className="relative grid grid-cols-[1fr] gap-4">
+          <CardHeader className="grid grid-cols-[74px_1fr] gap-x-4 gap-y-0  items-end">
+            <Image
+              src={`https://resources.premierleague.com/premierleague25/photos/players/110x140/${player.code}.png`}
+              alt={player.web_name}
+              width={73.4}
+              height={93.4}
+              unoptimized
+            />
 
-          <div className="absolute top-4 left-2 bg-zinc-900 text-white text-xs font-light w-8 h-8 aspect-square rounded-full flex items-center justify-center">
-            {managers.length}
-          </div>
-
-          <div className="flex flex-col gap-2 w-full">
-            <div className="grid grid-cols-[1fr_60px] items-center">
+            <div className="grid grid-cols-[1fr_60px] ">
               <div className="flex flex-col justify-center gap-1">
                 <span className="text-xs font-extralight capitalize leading-3">
                   {ELEMENT_TYPE[player.element_type]}
                 </span>
-                <span className="text-sm font-light capitalize leading-3.5">
+                <span className="text-sm font-medium capitalize leading-4">
                   {player.first_name} {player.second_name}
                 </span>
                 <span
@@ -123,42 +56,48 @@ const UniquePlayerGrid = async (props: UniquePlayerGridProps) => {
                 </span>
               </div>
             </div>
+          </CardHeader>
 
-            <div className="flex flex-wrap border-t border-zinc-900" />
-
-            <div className="flex flex-wrap">
-              {managers.map((manager) => (
-                <div
-                  key={manager.entry}
-                  className="w-full grid grid-cols-[28px_1fr_100px] items-start justify-start hover:bg-zinc-200 dark:hover:bg-zinc-800 py-1 px-1"
-                >
-                  <span className="font-light text-xs leading-4.5">
-                    #{manager.rank}
-                  </span>
-
-                  <div className="flex flex-col gap-1">
-                    <span className="font-light text-xs leading-3.5 capitalize">
-                      {manager.player_name.toLowerCase()}
-                    </span>
-                    <span className="text-xs font-extralight capitalize leading-3">
-                      {manager.entry_name.toLowerCase()}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] font-extralight capitalize leading-3">
-                      {manager.total} Points
-                    </span>
-
-                    <span className="text-[10px] font-extralight capitalize leading-3">
-                      {manager.event_total} GWP
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+          <CardContent>
+            <Tabs defaultValue="picked" className="gap-4">
+              <TabsList>
+                <TabsTrigger value="picked" className="text-xs font-normal">
+                  Picked{" "}
+                  <Badge className="text-xs font-normal w-5 h-5">
+                    {associated.length}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger value="dropped" className="text-xs font-normal">
+                  Dropped{" "}
+                  <Badge
+                    variant="destructive"
+                    className="aspect-square text-xs font-normal w-5 h-5"
+                  >
+                    {dropped.length}
+                  </Badge>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="picked">
+                <ScrollArea className="h-80">
+                  <ItemGroup className="gap-1">
+                    {associated.map((manager) => (
+                      <ManagerCard key={manager.entry} manager={manager} />
+                    ))}
+                  </ItemGroup>
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="dropped">
+                <ScrollArea className="h-80">
+                  <ItemGroup className="gap-1">
+                    {dropped.map((manager) => (
+                      <ManagerCard key={manager.entry} manager={manager} />
+                    ))}
+                  </ItemGroup>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

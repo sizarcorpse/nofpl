@@ -1,4 +1,8 @@
-import { createSearchParamsCache, parseAsStringLiteral } from "nuqs/server";
+import {
+  createSearchParamsCache,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
 
 export const searchParamsCache = createSearchParamsCache({
   sort: parseAsStringLiteral([
@@ -6,6 +10,7 @@ export const searchParamsCache = createSearchParamsCache({
     "most-picked",
     "club",
   ]).withDefault("club"),
+  search: parseAsString.withDefault(""),
 });
 
 export type SearchParams = Awaited<ReturnType<typeof searchParamsCache.parse>>;

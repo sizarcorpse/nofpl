@@ -1,5 +1,6 @@
+import ManagerCard from "@/components/manager-card";
 import TeamCard from "@/components/team-card";
-import { getElements, getEntryPicks } from "@/utils/db";
+import { getElements, getEntryPicks, getPlayers } from "@/utils/db";
 import type { Manager, Managers, Player, Players, Teams } from "@/utils/type";
 
 interface TeamGridProps {
@@ -10,36 +11,13 @@ interface TeamGridProps {
 const TeamGrid = async (props: TeamGridProps) => {
   const { managers, currentEventId } = props;
 
-  const picksPromises = managers.map((manager: Manager) =>
-    getEntryPicks({
-      entryId: manager.entry,
-      eventId: currentEventId,
-    })
-  );
-
-  const picksResults = await Promise.all(picksPromises);
-
-  const playerIds = picksResults.flatMap((result) =>
-    result.picks.map((pick: { element: number }) => pick.element)
-  );
-
-  const playerIdMap = Array.from(new Set(playerIds));
-  const players = await getElements({ elementIds: playerIdMap });
-  const playersMap = new Map(players.map((el: Player) => [el.id, el]));
-
-  const teams = managers.map((manager: Manager, index: number) => {
-    const players = picksResults[index].picks
-      .map((pick: { element: number }) => playersMap.get(pick.element))
-      .filter(Boolean) as Players;
-
-    return {
-      manager: manager,
-      players: players,
-    };
-  }) as Teams;
+  const teams = await getPlayers({
+    currentEventId,
+    managers,
+  });
 
   return (
-    <div className="grid grid-cols-1 gap-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-2 content-start md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {teams.map((team) => (
         <TeamCard key={team.manager.entry} team={team} />
       ))}
