@@ -51,7 +51,7 @@ export async function getEntryPicks({
         throw new Error("Failed to fetch entry picks data");
       }
 
-      console.log(`[cache] entryPicks hit: ${hit}`);
+      console.log(`[cache] entryPicks ${entryId}-${eventId} hit: ${hit}`);
 
       return await response.json();
     },
@@ -139,7 +139,9 @@ export async function getClassicLeague({
         throw new Error("Failed to fetch classic league");
       }
 
-      console.log(`[cache] classic-league hit: ${hit}`);
+      console.log(
+        `[cache] classic-league ${leagueId}-${page}-${newEntries}-${phase} hit: ${hit}`
+      );
 
       return await response.json();
     },
@@ -171,6 +173,7 @@ export async function getUniquePlayers({
   managers: Managers;
   params: SearchParams;
 }) {
+  const OWN_ENTRY_ID = 2937637;
   try {
     const picksPromises = managers.map((manager: Manager) =>
       getEntryPicks({
@@ -195,6 +198,17 @@ export async function getUniquePlayers({
 
         if (!player) return null;
 
+        const isOwnPicked = picksResults
+          .map((res, idx) =>
+            res.picks.some(
+              (pick: { element: number }) => pick.element === playerId
+            )
+              ? managers[idx].entry === OWN_ENTRY_ID
+              : false
+          )
+          .some((picked) => picked);
+        const playerWithFlag = { ...player, is_own_picked: isOwnPicked };
+
         const associated = picksResults
           .map((res, idx) =>
             res.picks.some(
@@ -210,7 +224,7 @@ export async function getUniquePlayers({
           .filter((m) => !associated.some((a) => a.entry === m.entry))
           .sort((a, b) => a.entry - b.entry);
 
-        return { player, associated, dropped };
+        return { player: playerWithFlag, associated, dropped };
       })
       .filter((item): item is UniquePlayerManager => item !== null);
 
@@ -224,6 +238,10 @@ export async function getUniquePlayers({
 
         return fullName.includes(searchTerm) || webName.includes(searchTerm);
       });
+    }
+
+    if (params.filter === "own-picked") {
+      result = result.filter(({ player }) => player.is_own_picked);
     }
 
     if (params.sort === "element-type") {
@@ -240,6 +258,12 @@ export async function getUniquePlayers({
     } else if (params.sort === "club") {
       result = result.sort(
         (a, b) => a.player.team - b.player.team || a.player.id - b.player.id
+      );
+    } else if (params.sort === "own-picked") {
+      result = result.sort(
+        (a, b) =>
+          Number(b.player.is_own_picked) - Number(a.player.is_own_picked) ||
+          a.player.id - b.player.id
       );
     } else {
       result = result.sort((a, b) => a.player.id - b.player.id);

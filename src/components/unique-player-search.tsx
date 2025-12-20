@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryState } from "nuqs";
 import type { ChangeEvent } from "react";
@@ -9,10 +8,7 @@ import { useEffect, useState } from "react";
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
   InputGroupInput,
-  InputGroupText,
-  InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { SearchIcon } from "lucide-react";
 
@@ -35,12 +31,12 @@ const UniquePlayerSearch = () => {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-80">
       <InputGroup>
         <InputGroupInput
           value={value}
           onChange={handleSearchChange}
-          placeholder="Search players by name or web name"
+          placeholder="Victor Gyökeres "
           aria-label="Search players"
         />
         <InputGroupAddon>

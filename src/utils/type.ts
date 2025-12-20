@@ -9,6 +9,7 @@ export type Player = {
   now_cost: number;
   total_points: number;
   selected_by_percent: string;
+  is_own_picked: boolean;
 };
 
 export type Players = Player[];

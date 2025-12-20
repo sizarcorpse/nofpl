@@ -1,5 +1,7 @@
+import { cn } from "@/libs/shadcn/utils";
 import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
 import { Player } from "@/utils/type";
+import { Star } from "lucide-react";
 import Image from "next/image";
 
 interface UniquePlayerCardProps {
@@ -19,7 +21,15 @@ const UniquePlayerCard = (props: UniquePlayerCardProps) => {
         unoptimized
       />
 
-      <div className="grid grid-cols-[1fr_60px] ">
+      <div className="grid grid-cols-[1fr_60px]">
+        <Star
+          className={cn(
+            "absolute top-6 right-6",
+            player.is_own_picked ? "text-amber-500" : "hidden"
+          )}
+          size={16}
+          color={player.is_own_picked ? "#fbbf24" : "#9ca3af"}
+        />
         <div className="flex flex-col justify-center gap-1">
           <span className="text-xs font-extralight capitalize leading-3">
             {ELEMENT_TYPE[player.element_type]}
