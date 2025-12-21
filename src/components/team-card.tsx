@@ -14,11 +14,14 @@ const TeamCard = (props: TeamCardProps) => {
   } = props;
 
   return (
-    <Card key={manager.entry} className="relative grid grid-cols-[1fr] gap-2">
-      <CardHeader className="grid grid-cols-[1fr_100px] items-center gap-2">
+    <Card
+      key={manager.entry}
+      className="relative grid grid-cols-[1fr] gap-2 py-4 sm:py-6"
+    >
+      <CardHeader className="grid grid-cols-[1fr_100px] items-center gap-2 px-4 sm:px-6">
         <TeamManagerCard manager={manager} />
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6">
         <ItemGroup className="gap-1">
           {players.map((player: Player) => (
             <TeamPlayerCard key={player.id} player={player} />

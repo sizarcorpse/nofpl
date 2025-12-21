@@ -5,23 +5,25 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UniquePlayerCard from "@/components/unique-player-card";
 import UniquePlayerManagerCard from "@/components/unique-player-manager-card";
-import type { UniquePlayerManager } from "@/utils/type";
+import type { UniquePlayer } from "@/utils/type";
 
 interface UniquePlayerGridProps {
-  players: UniquePlayerManager[];
+  players: UniquePlayer[];
 }
 
 const UniquePlayerGrid = async (props: UniquePlayerGridProps) => {
   const { players } = props;
-
   return (
     <div className="grid grid-cols-1 gap-2 content-start md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {players.map(({ player, associated, dropped }) => (
-        <Card key={player.id} className="relative grid grid-cols-[1fr] gap-4">
-          <CardHeader className="grid grid-cols-[74px_1fr] gap-x-4 gap-y-0  items-end">
+      {players.map(({ player, associated, dropped, live }) => (
+        <Card
+          key={player.id}
+          className="relative grid grid-cols-[1fr] gap-4 py-4 sm:py-6"
+        >
+          <CardHeader className="grid grid-cols-[74px_1fr] gap-x-4 gap-y-0 items-end px-4 sm:px-6">
             <UniquePlayerCard player={player} />
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <Tabs defaultValue="picked" className="gap-4">
               <TabsList>
                 <TabsTrigger value="picked" className="text-xs font-normal">

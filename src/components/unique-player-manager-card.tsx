@@ -4,10 +4,10 @@ import {
   ItemDescription,
   ItemTitle,
 } from "@/components/ui/item";
-import { Manager } from "@/utils/type";
+import { LeagueEntry } from "@/utils/type";
 
 interface ManagerCardProps {
-  manager: Manager;
+  manager: LeagueEntry;
 }
 
 const UniquePlayerManagerCard = ({ manager }: ManagerCardProps) => {

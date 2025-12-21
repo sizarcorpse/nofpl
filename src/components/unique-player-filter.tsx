@@ -20,7 +20,7 @@ const UniquePlayerFilter = () => {
     <Toggle
       aria-label="Toggle bookmark"
       variant="outline"
-      className="data-[state=on]:bg-transparent data-[state=on]:*:[svg]:fill-amber-500 data-[state=on]:*:[svg]:stroke-amber-500"
+      className="data-[state=on]:bg-transparent data-[state=on]:*:[svg]:fill-amber-500 data-[state=on]:*:[svg]:stroke-amber-500 bg-secondary/30"
       pressed={filter === "own-picked"}
       onPressedChange={handleFilterChange}
     >

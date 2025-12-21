@@ -1,11 +1,11 @@
 import { cn } from "@/libs/shadcn/utils";
 import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
-import { Player } from "@/utils/type";
+import { Element } from "@/utils/type";
 import { Star } from "lucide-react";
 import Image from "next/image";
 
 interface UniquePlayerCardProps {
-  player: Player;
+  player: Element & { is_own_picked: boolean };
 }
 
 const UniquePlayerCard = (props: UniquePlayerCardProps) => {
