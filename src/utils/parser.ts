@@ -12,6 +12,12 @@ export const searchParamsCache = createSearchParamsCache({
   ]).withDefault("club"),
   search: parseAsString.withDefault(""),
   filter: parseAsStringLiteral(["own-picked", ""]).withDefault(""),
+  tabs: parseAsStringLiteral([
+    "picked",
+    "dropped",
+    "history",
+    "fixtures",
+  ]).withDefault("picked"),
 });
 
 export type SearchParams = Awaited<ReturnType<typeof searchParamsCache.parse>>;

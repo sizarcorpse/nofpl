@@ -4,8 +4,10 @@ import type { SearchParams } from "@/utils/parser";
 import {
   Bootstrap,
   ClassicLeague,
+  ElementSummary,
+  ElementSummaryFixture,
+  ElementSummaryUpcomingFixture,
   EntryEvent,
-  EntryEventHistory,
   Event,
   LeagueEntry,
   Live,
@@ -18,6 +20,8 @@ import { revalidateTag } from "next/cache";
 export async function refreshCacheTag() {
   try {
     revalidateTag("refresh-on-demand", "max");
+
+    console.debug("Revalidated tag: refresh-on-demand");
   } catch (error) {
     throw new Error(`Failed to revalidate tag refresh-on-demand: ${error}`);
   }
@@ -35,6 +39,7 @@ export async function getBootstrap(): Promise<Bootstrap> {
           );
         }
 
+        console.debug("[🦠 getBootstrap]");
         return await response.json();
       },
       [JSON.stringify("bootstrap")],
@@ -64,6 +69,8 @@ export async function getLive({
             `Failed to fetch live data: ${response.status} ${response.statusText}`
           );
         }
+
+        console.debug(`[🚀 getLive] Event ID: ${currentEventId}`);
         return await response.json();
       },
       [JSON.stringify(["live", currentEventId])],
@@ -100,6 +107,9 @@ export async function getEntryEvent({
           );
         }
 
+        console.debug(
+          `[🎯 getEntryEvent] Entry ID: ${entryId}, Event ID: ${eventId}`
+        );
         return await response.json();
       },
       [JSON.stringify(["entryPicks", entryId, eventId])],
@@ -145,6 +155,9 @@ export async function getClassicLeague({
           );
         }
 
+        console.debug(
+          `[📊 getClassicLeague] League ID: ${leagueId}, Page: ${page}, New Entries: ${newEntries}, Phase: ${phase}`
+        );
         return await response.json();
       },
       [
@@ -167,6 +180,79 @@ export async function getClassicLeague({
     )();
   } catch (error) {
     throw new Error(`Failed to get classic league data: ${error}`);
+  }
+}
+
+export async function getElementSummary({
+  elementId,
+}: {
+  elementId: number;
+}): Promise<ElementSummary> {
+  try {
+    return await cache(
+      async () => {
+        const response = await fetch(
+          `${API_ENDPOINTS}/element-summary/${elementId}/`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `getElementSummary: ${response.status} ${response.statusText}`
+          );
+        }
+
+        console.debug(`[📋 getElementSummary] Element ID: ${elementId}`);
+        return await response.json();
+      },
+      [JSON.stringify({ "element-summary": elementId })],
+      {
+        revalidate: 60 * 60 * 2,
+        tags: [
+          createCacheKey("element-summary", elementId.toString()),
+          "refresh-on-demand",
+        ],
+      }
+    )();
+  } catch (error) {
+    throw new Error(`Failed to get element summary data: ${error}`);
+  }
+}
+
+export async function getElementSummaryUseCase({
+  elementIds,
+  fixturesCount,
+  historyCount,
+}: {
+  elementIds: number[];
+  fixturesCount?: number;
+  historyCount?: number;
+}): Promise<ElementSummary[]> {
+  try {
+    const summaries = await Promise.all(
+      elementIds.map((elementId) => getElementSummary({ elementId }))
+    );
+
+    const limitFixtures = (fixtures: ElementSummaryUpcomingFixture[]) => {
+      if (fixturesCount && fixtures.length > fixturesCount) {
+        return fixtures.slice(0, fixturesCount);
+      }
+      return fixtures;
+    };
+
+    const limitHistory = (history: ElementSummaryFixture[]) => {
+      if (historyCount && history.length > historyCount) {
+        return history.slice(-historyCount);
+      }
+      return history;
+    };
+
+    return summaries.map((summary, index) => ({
+      id: elementIds[index],
+      fixtures: limitFixtures(summary.fixtures),
+      history: limitHistory(summary.history).reverse(),
+    }));
+  } catch (error) {
+    throw new Error(`Failed to get element summaries: ${error}`);
   }
 }
 
@@ -241,10 +327,14 @@ export async function getLiveElementsUseCase({
 export async function getUniquePlayersUseCase({
   currentEventId,
   managers,
+  historyCount = 3,
+  fixturesCount = 3,
   params,
 }: {
   currentEventId: number;
   managers: LeagueEntry[];
+  historyCount?: number;
+  fixturesCount?: number;
   params: SearchParams;
 }): Promise<UniquePlayer[]> {
   try {
@@ -262,6 +352,11 @@ export async function getUniquePlayersUseCase({
     const managersMap = managers.map((m, index) => ({
       ...m,
       ...eventResults[index].entry_history,
+      league_entry_rank: m.rank,
+      league_entry_rank_sort: m.rank_sort,
+      entry_event_history_rank: eventResults[index].entry_history.rank,
+      entry_event_history_rank_sort:
+        eventResults[index].entry_history.rank_sort,
     }));
 
     const picksIds = new Set(
@@ -275,6 +370,16 @@ export async function getUniquePlayersUseCase({
     const live = await getLive({ currentEventId });
     const liveMap = new Map(live.elements.map((el) => [el.id, el.stats]));
 
+    const summaries = await getElementSummaryUseCase({
+      elementIds: uniquePlayerIds,
+      fixturesCount,
+      historyCount,
+    });
+
+    const summariesMap = new Map(
+      summaries.map((summary) => [summary.id, summary])
+    );
+
     const managerPicks = eventResults.map((result, idx) => ({
       manager: managersMap[idx],
       picks: new Set(result.picks.map((pick) => pick.element)),
@@ -283,8 +388,9 @@ export async function getUniquePlayersUseCase({
     let result = uniquePlayerIds.map((playerId) => {
       const player = elementsMap.get(playerId);
       const liveStats = liveMap.get(playerId);
+      const summary = summariesMap.get(playerId);
 
-      if (!player || !liveStats) {
+      if (!player || !liveStats || !summary) {
         throw new Error(`Player with ID ${playerId} not found`);
       }
 
@@ -311,6 +417,7 @@ export async function getUniquePlayersUseCase({
         associated,
         dropped,
         live: liveStats,
+        summary,
       };
     });
 

@@ -28,6 +28,15 @@ export interface LiveElementStats {
   ict_index: string;
   total_points: number;
   in_dreamteam: boolean;
+  clearances_blocks_interceptions: number;
+  defensive_contribution: number;
+  expected_assists: string;
+  expected_goal_involvements: string;
+  expected_goals: string;
+  expected_goals_conceded: string;
+  recoveries: number;
+  starts: number;
+  tackles: number;
 }
 
 export interface Bootstrap {
@@ -189,9 +198,85 @@ export interface LeagueEntry {
   event_total: number;
 }
 
+export interface ElementSummary {
+  id: number;
+  fixtures: ElementSummaryUpcomingFixture[];
+  history: ElementSummaryFixture[];
+  // history_past: ElementSummarySeason[];
+}
+export interface ElementSummaryUpcomingFixture {
+  code: number;
+  difficulty: number;
+  event: number;
+  event_name: string;
+  finished: boolean;
+  id: number;
+  is_home: boolean;
+  kickoff_time: string;
+  minutes: number;
+  provisional_start_time: boolean;
+  team_a: number;
+  team_a_score: number | null;
+  team_h: number;
+  team_h_score: number | null;
+}
+export interface ElementSummaryFixture {
+  assists: number;
+  bonus: number;
+  bps: number;
+  clean_sheets: number;
+  creativity: string;
+  element: number;
+  fixture: number;
+  goals_conceded: number;
+  goals_scored: number;
+  ict_index: string;
+  influence: string;
+  kickoff_time: string;
+  minutes: number;
+  opponent_team: number;
+  own_goals: number;
+  penalties_missed: number;
+  penalties_saved: number;
+  red_cards: number;
+  round: number;
+  saves: number;
+  selected: number;
+  team_a_score: number;
+  team_h_score: number;
+  threat: string;
+  total_points: number;
+  transfers_balance: number;
+  transfers_in: number;
+  transfers_out: number;
+  value: number;
+  was_home: boolean;
+  yellow_cards: number;
+  defensive_contribution: number;
+  modified: boolean;
+  clearances_blocks_interceptions: number;
+  recoveries: number;
+  tackles: number;
+  starts: number;
+  expected_goals: string;
+  expected_assists: string;
+  expected_goal_involvements: string;
+  expected_goals_conceded: string;
+}
+
+export interface LeagueEntryEventHistory
+  extends LeagueEntry,
+    EntryEventHistory {
+  league_entry_rank: number;
+  league_entry_rank_sort: number;
+  entry_event_history_rank: number;
+  entry_event_history_rank_sort: number;
+}
+
 export type UniquePlayer = {
   player: Element & { is_own_picked: boolean };
-  associated: LeagueEntry[];
-  dropped: LeagueEntry[];
+  associated: LeagueEntryEventHistory[];
+  dropped: LeagueEntryEventHistory[];
   live: LiveElementStats;
+  summary: ElementSummary;
 };

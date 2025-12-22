@@ -22,8 +22,14 @@ export default async function PlayersPage(props: PageProps<"/">) {
   const players = await getUniquePlayersUseCase({
     currentEventId,
     managers,
+    historyCount: 5,
+    fixturesCount: 5,
     params,
   });
 
-  return <UniquePlayerGrid players={players} />;
+  return (
+    <div className="w-full grid grid-cols-1 justify-items-center">
+      <UniquePlayerGrid players={players} />
+    </div>
+  );
 }
