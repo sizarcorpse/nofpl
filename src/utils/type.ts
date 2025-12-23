@@ -280,3 +280,8 @@ export type UniquePlayer = {
   live: LiveElementStats;
   summary: ElementSummary;
 };
+
+export type Team = {
+  manager: LeagueEntryEventHistory;
+  players: Element[];
+};

@@ -12,6 +12,7 @@ import {
   LeagueEntry,
   Live,
   LiveElement,
+  Team,
   UniquePlayer,
 } from "@/utils/type";
 import { createCacheKey } from "@/utils/utils";
@@ -462,13 +463,13 @@ export async function getUniquePlayersUseCase({
   }
 }
 
-export async function getTeamPlayersUseCase({
+export async function getTeamUseCase({
   currentEventId,
   managers,
 }: {
   currentEventId: number;
   managers: LeagueEntry[];
-}) {
+}): Promise<Team[]> {
   try {
     const eventPromises = managers.map((manager) =>
       getEntryEvent({
@@ -482,6 +483,11 @@ export async function getTeamPlayersUseCase({
     const managersMap = managers.map((m, index) => ({
       ...m,
       ...eventResults[index].entry_history,
+      league_entry_rank: m.rank,
+      league_entry_rank_sort: m.rank_sort,
+      entry_event_history_rank: eventResults[index].entry_history.rank,
+      entry_event_history_rank_sort:
+        eventResults[index].entry_history.rank_sort,
     }));
 
     const picksIds = new Set(
@@ -498,7 +504,7 @@ export async function getTeamPlayersUseCase({
 
       const players = picks
         .map((pick) => elementsMap.get(pick.element))
-        .filter(Boolean);
+        .filter((p) => p !== undefined);
 
       return {
         manager: manager,

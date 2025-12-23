@@ -1,24 +1,17 @@
 import TeamCard from "@/components/team-card";
-import { getPlayers } from "@/utils/db";
-import type { Managers } from "@/utils/type";
+import type { Team } from "@/utils/type";
 
 interface TeamGridProps {
-  managers: Managers;
-  currentEventId: number;
+  teams: Team[];
 }
 
 const TeamGrid = async (props: TeamGridProps) => {
-  const { managers, currentEventId } = props;
-
-  const teams = await getPlayers({
-    currentEventId,
-    managers,
-  });
+  const { teams } = props;
 
   return (
-    <div className="grid grid-cols-1 gap-2 content-start md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {teams.map((team) => (
-        <TeamCard key={team.manager.entry} team={team} />
+    <div className="w-full grid grid-cols-1 gap-2 justify-items-center max-w-96 lg:grid-cols-2 lg:max-w-3xl xl:grid-cols-3 xl:max-w-6xl 2xl:grid-cols-4 2xl:max-w-384">
+      {teams.map((team, index) => (
+        <TeamCard key={index} team={team} />
       ))}
     </div>
   );

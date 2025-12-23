@@ -23,10 +23,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   players,
-}: // teams,
-Readonly<{
+  teams,
+}: Readonly<{
   players: React.ReactNode;
-  // teams: React.ReactNode;
+  teams: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -44,7 +44,7 @@ Readonly<{
               <main className="flex min-h-screen min-w-full flex-col items-center justify-stretch py-32 px-4 gap-4 sm:px-8 sm:gap-8">
                 <Header />
                 {players}
-                {/* {teams} */}
+                {teams}
               </main>
             </div>
           </ThemeProvider>

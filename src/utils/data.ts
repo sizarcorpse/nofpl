@@ -1,4 +1,4 @@
-export const API_ENDPOINTS = "https://fantasy.premierleague.com/api";
+export const API_ENDPOINTS = "https://fantasy.premierleague.com/api" as const;
 
 export const ELEMENT_TYPE: { [key: number]: string } = {
   1: "Goalkeeper",

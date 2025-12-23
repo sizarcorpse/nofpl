@@ -1,10 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Item, ItemContent, ItemMedia } from "@/components/ui/item";
 import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
-import type { Player, Team } from "@/utils/type";
+import type { Element } from "@/utils/type";
 import Image from "next/image";
+
 interface TeamCardProps {
-  player: Player;
+  player: Element;
 }
 
 const TeamPlayerCard = (props: TeamCardProps) => {
@@ -19,8 +20,8 @@ const TeamPlayerCard = (props: TeamCardProps) => {
             <Image
               src={image}
               alt={player.web_name}
-              width={48}
-              height={48}
+              width={40}
+              height={40}
               unoptimized
               className="object-cover align-top object-top aspect-square"
             />
