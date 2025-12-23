@@ -1,3 +1,4 @@
+import UniquePlayerEmpty from "@/components/unique-player-empty";
 import UniquePlayerGrid from "@/components/unique-player-grid";
 import {
   getClassicLeague,
@@ -26,6 +27,10 @@ export default async function PlayersPage(props: PageProps<"/">) {
     fixturesCount: 5,
     params,
   });
+
+  if (players.length === 0) {
+    return <UniquePlayerEmpty />;
+  }
 
   return (
     <div className="w-full grid grid-cols-1 justify-items-center">
