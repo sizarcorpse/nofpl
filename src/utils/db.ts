@@ -438,15 +438,17 @@ export async function getUniquePlayersUseCase({
     const live = await getLive({ eventId });
     const liveMap = new Map(live.elements.map((el) => [el.id, el.stats]));
 
-    const picks = eventResults.flatMap((result) => {
-      return result.picks
-        .map((pick) => {
-          const isUnique = uniquePlayerIds.includes(pick.element);
-          return isUnique ? pick : null;
-        })
-        .filter((pick) => pick !== null);
+    const captainCountMap = new Map<number, number>();
+    eventResults.forEach((result) => {
+      result.picks.forEach((pick) => {
+        if (pick.is_captain) {
+          captainCountMap.set(
+            pick.element,
+            (captainCountMap.get(pick.element) ?? 0) + 1
+          );
+        }
+      });
     });
-    const picksMap = new Map(picks.map((pick) => [pick.element, pick]));
 
     const summaries = await getElementSummaryUseCase({
       elementIds: uniquePlayerIds,
@@ -466,12 +468,7 @@ export async function getUniquePlayersUseCase({
       const player = elementsMap.get(playerId);
       const liveStats = liveMap.get(playerId);
       const summary = summariesMap.get(playerId);
-      const captainCount = managerPicks.reduce((count, { picks: mp }) => {
-        const pickForPlayer = picksMap.get(playerId);
-        return mp.has(playerId) && pickForPlayer?.is_captain
-          ? count + 1
-          : count;
-      }, 0);
+      const captainCount = captainCountMap.get(playerId) ?? 0;
 
       if (!player || !liveStats || !summary) {
         throw new Error(`Player with ID ${playerId} not found`);
@@ -542,6 +539,11 @@ export async function getUniquePlayersUseCase({
         a.player.team - b.player.team || a.player.id - b.player.id,
       "own-picked": (a, b) =>
         Number(b.player.is_own_picked) - Number(a.player.is_own_picked) ||
+        a.player.id - b.player.id,
+      "most-points": (a, b) =>
+        b.live.total_points - a.live.total_points || a.player.id - b.player.id,
+      "most-captains": (a, b) =>
+        b.player.captain_count - a.player.captain_count ||
         a.player.id - b.player.id,
       default: (a, b) => a.player.id - b.player.id,
     };

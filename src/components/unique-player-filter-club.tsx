@@ -58,7 +58,7 @@ const UniquePlayerFilterClub = () => {
       <PopoverContent className="w-[12.5rem] p-0" align="start">
         <Command>
           <CommandInput placeholder="Search club..." />
-          <CommandList>
+          <CommandList className="h-52">
             <CommandEmpty>No club found.</CommandEmpty>
 
             <CommandGroup>

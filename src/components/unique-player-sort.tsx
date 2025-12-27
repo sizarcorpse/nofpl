@@ -30,6 +30,10 @@ const UniquePlayerSort = () => {
         return "Most Picked";
       case "club":
         return "Club";
+      case "most-points":
+        return "Most Points";
+      case "most-captains":
+        return "Most Captains";
       default:
         return "Club";
     }
@@ -40,13 +44,13 @@ const UniquePlayerSort = () => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="w-full max-w-36 justify-between text-sm font-light"
+          className="w-full max-w-full justify-between text-sm font-light col-span-3"
         >
           {getSortLabel(sort || "club")}
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-full max-w-36">
+      <DropdownMenuContent align="end" className="w-full col-span-3">
         <DropdownMenuItem onSelect={() => handleSortChange("element-type")}>
           Element Type
         </DropdownMenuItem>
@@ -55,6 +59,12 @@ const UniquePlayerSort = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => handleSortChange("club")}>
           Club
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => handleSortChange("most-points")}>
+          Most Points
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => handleSortChange("most-captains")}>
+          Most Captains
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

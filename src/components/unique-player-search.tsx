@@ -31,7 +31,7 @@ const UniquePlayerSearch = () => {
   };
 
   return (
-    <div className="w-full max-w-80">
+    <div className="w-full col-span-5">
       <InputGroup>
         <InputGroupInput
           value={value}

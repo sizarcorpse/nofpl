@@ -33,7 +33,10 @@ export default async function PlayersPage(props: PageProps<"/">) {
   }
 
   return (
-    <div className="w-full grid grid-cols-1 justify-items-center">
+    <div
+      id="players"
+      className="w-full grid grid-cols-1 justify-items-center pt-32 lg:pt-20 "
+    >
       <UniquePlayerGrid players={players} />
     </div>
   );

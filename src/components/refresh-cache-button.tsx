@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { RotateCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const RefreshCacheButton = () => {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleRefresh = async () => {
     try {
@@ -20,6 +22,7 @@ const RefreshCacheButton = () => {
       }
 
       setLoading(false);
+      router.refresh();
     } catch (error) {
       setLoading(false);
     }

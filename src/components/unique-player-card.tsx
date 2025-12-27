@@ -3,7 +3,6 @@ import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
 import { Element } from "@/utils/type";
 import { Star } from "lucide-react";
 import Image from "next/image";
-import { Badge } from "./ui/badge";
 
 interface UniquePlayerCardProps {
   player: Element & { is_own_picked: boolean; captain_count: number };
@@ -37,6 +36,7 @@ const UniquePlayerCard = (props: UniquePlayerCardProps) => {
               {player.captain_count}
             </div>
           )}
+
           <div className="flex flex-col justify-center gap-1">
             <span className="text-xs font-extralight capitalize leading-3">
               {ELEMENT_TYPE[player.element_type]}

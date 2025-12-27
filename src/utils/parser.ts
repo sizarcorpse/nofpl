@@ -11,6 +11,8 @@ export const searchParamsCache = createSearchParamsCache({
     "element-type",
     "most-picked",
     "club",
+    "most-points",
+    "most-captains",
   ]).withDefault("club"),
   search: parseAsString.withDefault(""),
   filter: parseAsStringLiteral(["own-picked", ""]).withDefault(""),
