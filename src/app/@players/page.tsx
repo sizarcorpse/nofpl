@@ -21,8 +21,8 @@ export default async function PlayersPage(props: PageProps<"/">) {
   });
 
   const players = await getUniquePlayersUseCase({
-    currentEventId,
-    managers,
+    eventId: currentEventId,
+    managers: managers,
     historyCount: 5,
     fixturesCount: 5,
     params,

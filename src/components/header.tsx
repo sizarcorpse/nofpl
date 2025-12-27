@@ -1,6 +1,7 @@
 import RefreshCacheButton from "@/components/refresh-cache-button";
 import ThemeToggle from "@/components/theme-toggle";
-import UniquePlayerFilter from "@/components/unique-player-filter";
+import UniquePlayerFilterClub from "@/components/unique-player-filter-club";
+import UniquePlayerFilterOwn from "@/components/unique-player-filter-own";
 import UniquePlayerSearch from "@/components/unique-player-search";
 import UniquePlayerSort from "@/components/unique-player-sort";
 import { Suspense } from "react";
@@ -12,7 +13,8 @@ const Header = () => {
         <RefreshCacheButton />
         <ThemeToggle />
         <Suspense fallback={<div className="h-10" />}>
-          <UniquePlayerFilter />
+          <UniquePlayerFilterOwn />
+          <UniquePlayerFilterClub />
         </Suspense>
       </div>
       <div className="flex items-center justify-end gap-2">

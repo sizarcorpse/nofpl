@@ -14,6 +14,9 @@ const TeamCard = (props: TeamCardProps) => {
     team: { manager, players },
   } = props;
 
+  const lineup = players.filter((player) => player.pick.position <= 11);
+  const substitutes = players.filter((player) => player.pick.position > 11);
+
   return (
     <Card key={manager.entry} className="relative w-full gap-2 max-w-96">
       <CardHeader className="gap-0">
@@ -22,7 +25,13 @@ const TeamCard = (props: TeamCardProps) => {
       <CardContent className="flex flex-col gap-2">
         <Separator />
         <ItemGroup className="gap-1">
-          {players.map((player) => (
+          {lineup.map((player) => (
+            <TeamPlayerCard key={player.id} player={player} />
+          ))}
+        </ItemGroup>
+        <Separator />
+        <ItemGroup className="gap-1">
+          {substitutes.map((player) => (
             <TeamPlayerCard key={player.id} player={player} />
           ))}
         </ItemGroup>

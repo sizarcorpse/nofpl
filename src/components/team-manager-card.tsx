@@ -24,11 +24,11 @@ const TeamManagerCard = (props: TeamManagerCardProps) => {
         </span>
 
         <span className="text-xs font-extralight capitalize leading-3">
-          {manager.total_points} Points
+          {manager.entry_event_history_total_points} Points
         </span>
 
         <span className="text-xs font-extralight capitalize leading-3">
-          {manager.points} GWP
+          {manager.entry_event_history_points} GWP
         </span>
       </div>
     </div>

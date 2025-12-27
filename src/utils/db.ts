@@ -18,6 +18,39 @@ import {
 import { createCacheKey } from "@/utils/utils";
 import { revalidateTag } from "next/cache";
 
+export type ApiError = {
+  isMaintenanceMode: boolean;
+  message: string;
+  statusCode?: number;
+};
+
+function isMaintenanceError(status: number): boolean {
+  return status === 503 || status === 502 || status === 504;
+}
+
+function createApiError(
+  error: unknown,
+  context: string,
+  statusCode?: number
+): ApiError {
+  if (statusCode && isMaintenanceError(statusCode)) {
+    return {
+      isMaintenanceMode: true,
+      message:
+        "FPL is currently updating. This usually takes 1-1.30 hours before each gameweek. Please check back shortly.",
+      statusCode,
+    };
+  }
+
+  return {
+    isMaintenanceMode: false,
+    message: `${context}: ${
+      error instanceof Error ? error.message : String(error)
+    }`,
+    statusCode,
+  };
+}
+
 export async function refreshCacheTag() {
   try {
     revalidateTag("refresh-on-demand", "max");
@@ -35,9 +68,12 @@ export async function getBootstrap(): Promise<Bootstrap> {
         const response = await fetch(`${API_ENDPOINTS}/bootstrap-static/`);
 
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch bootstrap data: ${response.status} ${response.statusText}`
+          const error = createApiError(
+            new Error(response.statusText),
+            "Failed to fetch bootstrap data",
+            response.status
           );
+          throw error;
         }
 
         console.debug("[🦠 getBootstrap]");
@@ -50,41 +86,42 @@ export async function getBootstrap(): Promise<Bootstrap> {
       }
     )();
   } catch (error) {
-    throw new Error(`Failed to get bootstrap data: ${error}`);
+    if ((error as ApiError).isMaintenanceMode !== undefined) {
+      throw error;
+    }
+    throw createApiError(error, "Failed to get bootstrap data");
   }
 }
 
-export async function getLive({
-  currentEventId,
-}: {
-  currentEventId: number;
-}): Promise<Live> {
+export async function getLive({ eventId }: { eventId: number }): Promise<Live> {
   try {
     return await cache(
       async () => {
-        const response = await fetch(
-          `${API_ENDPOINTS}/event/${currentEventId}/live/`
-        );
+        const response = await fetch(`${API_ENDPOINTS}/event/${eventId}/live/`);
+
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch live data: ${response.status} ${response.statusText}`
+          const error = createApiError(
+            new Error(response.statusText),
+            `Failed to fetch live data for event ${eventId}`,
+            response.status
           );
+          throw error;
         }
 
-        console.debug(`[🚀 getLive] Event ID: ${currentEventId}`);
+        console.debug(`[🚀 getLive] Event ID: ${eventId}`);
         return await response.json();
       },
-      [JSON.stringify(["live", currentEventId])],
+      [JSON.stringify(["live", eventId])],
       {
         revalidate: 60 * 60 * 2,
-        tags: [
-          createCacheKey("live", currentEventId.toString()),
-          "refresh-on-demand",
-        ],
+        tags: [createCacheKey("live", eventId.toString()), "refresh-on-demand"],
       }
     )();
   } catch (error) {
-    throw new Error(`Failed to get live data: ${error}`);
+    if ((error as ApiError).isMaintenanceMode !== undefined) {
+      throw error;
+    }
+    throw createApiError(error, `Failed to get live data for event ${eventId}`);
   }
 }
 
@@ -103,9 +140,12 @@ export async function getEntryEvent({
         );
 
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch entry picks data: ${response.status} ${response.statusText}`
+          const error = createApiError(
+            new Error(response.statusText),
+            `Failed to fetch entry picks for entry ${entryId}, event ${eventId}`,
+            response.status
           );
+          throw error;
         }
 
         console.debug(
@@ -128,7 +168,13 @@ export async function getEntryEvent({
       }
     )();
   } catch (error) {
-    throw new Error(`Failed to get entry picks data: ${error}`);
+    if ((error as ApiError).isMaintenanceMode !== undefined) {
+      throw error;
+    }
+    throw createApiError(
+      error,
+      `Failed to get entry picks for entry ${entryId}, event ${eventId}`
+    );
   }
 }
 
@@ -151,9 +197,12 @@ export async function getClassicLeague({
         );
 
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch classic league: ${response.status} ${response.statusText}`
+          const error = createApiError(
+            new Error(response.statusText),
+            `Failed to fetch classic league ${leagueId}`,
+            response.status
           );
+          throw error;
         }
 
         console.debug(
@@ -180,7 +229,13 @@ export async function getClassicLeague({
       }
     )();
   } catch (error) {
-    throw new Error(`Failed to get classic league data: ${error}`);
+    if ((error as ApiError).isMaintenanceMode !== undefined) {
+      throw error;
+    }
+    throw createApiError(
+      error,
+      `Failed to get classic league ${leagueId} data`
+    );
   }
 }
 
@@ -197,9 +252,12 @@ export async function getElementSummary({
         );
 
         if (!response.ok) {
-          throw new Error(
-            `getElementSummary: ${response.status} ${response.statusText}`
+          const error = createApiError(
+            new Error(response.statusText),
+            `Failed to fetch element summary for player ${elementId}`,
+            response.status
           );
+          throw error;
         }
 
         console.debug(`[📋 getElementSummary] Element ID: ${elementId}`);
@@ -215,7 +273,13 @@ export async function getElementSummary({
       }
     )();
   } catch (error) {
-    throw new Error(`Failed to get element summary data: ${error}`);
+    if ((error as ApiError).isMaintenanceMode !== undefined) {
+      throw error;
+    }
+    throw createApiError(
+      error,
+      `Failed to get element summary for player ${elementId}`
+    );
   }
 }
 
@@ -302,14 +366,14 @@ export async function getElementsUseCase({
 }
 
 export async function getLiveElementsUseCase({
-  currentEventId,
+  eventId,
   elementIds,
 }: {
-  currentEventId: number;
+  eventId: number;
   elementIds: number[];
 }): Promise<LiveElement[]> {
   try {
-    const live = await getLive({ currentEventId });
+    const live = await getLive({ eventId });
 
     if (!live) {
       return [];
@@ -326,13 +390,13 @@ export async function getLiveElementsUseCase({
 }
 
 export async function getUniquePlayersUseCase({
-  currentEventId,
+  eventId,
   managers,
   historyCount = 3,
   fixturesCount = 3,
   params,
 }: {
-  currentEventId: number;
+  eventId: number;
   managers: LeagueEntry[];
   historyCount?: number;
   fixturesCount?: number;
@@ -345,7 +409,7 @@ export async function getUniquePlayersUseCase({
       managers.map((manager) =>
         getEntryEvent({
           entryId: manager.entry,
-          eventId: currentEventId,
+          eventId,
         })
       )
     );
@@ -358,6 +422,9 @@ export async function getUniquePlayersUseCase({
       entry_event_history_rank: eventResults[index].entry_history.rank,
       entry_event_history_rank_sort:
         eventResults[index].entry_history.rank_sort,
+      entry_event_history_points: eventResults[index].entry_history.points,
+      entry_event_history_total_points:
+        eventResults[index].entry_history.total_points,
     }));
 
     const picksIds = new Set(
@@ -368,15 +435,24 @@ export async function getUniquePlayersUseCase({
     const elements = await getElementsUseCase({ elementIds: uniquePlayerIds });
     const elementsMap = new Map(elements.map((el) => [el.id, el]));
 
-    const live = await getLive({ currentEventId });
+    const live = await getLive({ eventId });
     const liveMap = new Map(live.elements.map((el) => [el.id, el.stats]));
+
+    const picks = eventResults.flatMap((result) => {
+      return result.picks
+        .map((pick) => {
+          const isUnique = uniquePlayerIds.includes(pick.element);
+          return isUnique ? pick : null;
+        })
+        .filter((pick) => pick !== null);
+    });
+    const picksMap = new Map(picks.map((pick) => [pick.element, pick]));
 
     const summaries = await getElementSummaryUseCase({
       elementIds: uniquePlayerIds,
       fixturesCount,
       historyCount,
     });
-
     const summariesMap = new Map(
       summaries.map((summary) => [summary.id, summary])
     );
@@ -390,6 +466,12 @@ export async function getUniquePlayersUseCase({
       const player = elementsMap.get(playerId);
       const liveStats = liveMap.get(playerId);
       const summary = summariesMap.get(playerId);
+      const captainCount = managerPicks.reduce((count, { picks: mp }) => {
+        const pickForPlayer = picksMap.get(playerId);
+        return mp.has(playerId) && pickForPlayer?.is_captain
+          ? count + 1
+          : count;
+      }, 0);
 
       if (!player || !liveStats || !summary) {
         throw new Error(`Player with ID ${playerId} not found`);
@@ -399,9 +481,10 @@ export async function getUniquePlayersUseCase({
       const dropped = [];
       let isOwnPicked = false;
 
-      for (const { manager, picks } of managerPicks) {
-        if (picks.has(playerId)) {
+      for (const { manager, picks: mp } of managerPicks) {
+        if (mp.has(playerId)) {
           associated.push(manager);
+
           if (manager.entry === OWN_ENTRY_ID) {
             isOwnPicked = true;
           }
@@ -414,7 +497,11 @@ export async function getUniquePlayersUseCase({
       dropped.sort((a, b) => a.entry - b.entry);
 
       return {
-        player: { ...player, is_own_picked: isOwnPicked },
+        player: {
+          ...player,
+          is_own_picked: isOwnPicked,
+          captain_count: captainCount,
+        },
         associated,
         dropped,
         live: liveStats,
@@ -434,6 +521,12 @@ export async function getUniquePlayersUseCase({
 
     if (params.filter === "own-picked") {
       result = result.filter(({ player }) => player.is_own_picked);
+    }
+
+    if (params.club) {
+      const clubId = parseInt(params.club);
+
+      result = result.filter(({ player }) => player.team === clubId);
     }
 
     const sortFunctions: Record<
@@ -464,10 +557,10 @@ export async function getUniquePlayersUseCase({
 }
 
 export async function getTeamUseCase({
-  currentEventId,
+  eventId: currentEventId,
   managers,
 }: {
-  currentEventId: number;
+  eventId: number;
   managers: LeagueEntry[];
 }): Promise<Team[]> {
   try {
@@ -488,6 +581,9 @@ export async function getTeamUseCase({
       entry_event_history_rank: eventResults[index].entry_history.rank,
       entry_event_history_rank_sort:
         eventResults[index].entry_history.rank_sort,
+      entry_event_history_points: eventResults[index].entry_history.points,
+      entry_event_history_total_points:
+        eventResults[index].entry_history.total_points,
     }));
 
     const picksIds = new Set(
@@ -503,7 +599,19 @@ export async function getTeamUseCase({
       const picks = eventResults[index].picks;
 
       const players = picks
-        .map((pick) => elementsMap.get(pick.element))
+        .map((pick) => {
+          const element = elementsMap.get(pick.element);
+          if (!element) return undefined;
+          return {
+            ...element,
+            pick: {
+              is_captain: pick.is_captain,
+              is_vice_captain: pick.is_vice_captain,
+              multiplier: pick.multiplier,
+              position: pick.position,
+            },
+          };
+        })
         .filter((p) => p !== undefined);
 
       return {

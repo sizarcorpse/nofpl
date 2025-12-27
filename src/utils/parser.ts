@@ -4,6 +4,8 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 
+import { TEAMS } from "@/utils/data";
+
 export const searchParamsCache = createSearchParamsCache({
   sort: parseAsStringLiteral([
     "element-type",
@@ -12,6 +14,7 @@ export const searchParamsCache = createSearchParamsCache({
   ]).withDefault("club"),
   search: parseAsString.withDefault(""),
   filter: parseAsStringLiteral(["own-picked", ""]).withDefault(""),
+  club: parseAsStringLiteral(Object.keys(TEAMS)).withDefault(""),
   tabs: parseAsStringLiteral([
     "picked",
     "dropped",

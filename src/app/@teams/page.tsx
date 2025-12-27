@@ -18,8 +18,8 @@ export default async function TeamsPage(props: PageProps<"/">) {
   });
 
   const teams = await getTeamUseCase({
-    currentEventId,
-    managers,
+    eventId: currentEventId,
+    managers: managers,
   });
 
   return <TeamGrid teams={teams} />;

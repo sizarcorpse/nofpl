@@ -4,7 +4,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Star } from "lucide-react";
 import { useQueryState } from "nuqs";
 
-const UniquePlayerFilter = () => {
+const UniquePlayerFilterOwn = () => {
   const [filter, setFilter] = useQueryState("filter", {
     history: "replace",
     shallow: false,
@@ -29,4 +29,4 @@ const UniquePlayerFilter = () => {
   );
 };
 
-export default UniquePlayerFilter;
+export default UniquePlayerFilterOwn;

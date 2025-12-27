@@ -3,9 +3,10 @@ import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
 import { Element } from "@/utils/type";
 import { Star } from "lucide-react";
 import Image from "next/image";
+import { Badge } from "./ui/badge";
 
 interface UniquePlayerCardProps {
-  player: Element & { is_own_picked: boolean };
+  player: Element & { is_own_picked: boolean; captain_count: number };
 }
 
 const UniquePlayerCard = (props: UniquePlayerCardProps) => {
@@ -24,14 +25,18 @@ const UniquePlayerCard = (props: UniquePlayerCardProps) => {
 
       <div className="flex flex-col items-stretch justify-start gap-4">
         <div className="grid grid-cols-[1fr_60px]">
-          <Star
-            className={cn(
-              "absolute top-6 left-6",
-              player.is_own_picked ? "text-amber-500" : "hidden"
-            )}
-            size={16}
-            color={player.is_own_picked ? "#fbbf24" : "#9ca3af"}
-          />
+          {player.is_own_picked && (
+            <Star
+              className={cn("absolute top-6 left-6 text-amber-500")}
+              size={16}
+            />
+          )}
+
+          {player.captain_count > 0 && (
+            <div className="absolute top-6 right-6 w-6 h-6 text-xs rounded-full font-bold bg-amber-500 text-zinc-900 flex items-center justify-center">
+              {player.captain_count}
+            </div>
+          )}
           <div className="flex flex-col justify-center gap-1">
             <span className="text-xs font-extralight capitalize leading-3">
               {ELEMENT_TYPE[player.element_type]}

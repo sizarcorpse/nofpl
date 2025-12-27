@@ -271,10 +271,12 @@ export interface LeagueEntryEventHistory
   league_entry_rank_sort: number;
   entry_event_history_rank: number;
   entry_event_history_rank_sort: number;
+  entry_event_history_points: number;
+  entry_event_history_total_points: number;
 }
 
 export type UniquePlayer = {
-  player: Element & { is_own_picked: boolean };
+  player: Element & { is_own_picked: boolean; captain_count: number };
   associated: LeagueEntryEventHistory[];
   dropped: LeagueEntryEventHistory[];
   live: LiveElementStats;
@@ -283,5 +285,7 @@ export type UniquePlayer = {
 
 export type Team = {
   manager: LeagueEntryEventHistory;
-  players: Element[];
+  players: TeamPlayer[];
 };
+
+export type TeamPlayer = Element & { pick: Omit<EntryEventPick, "element"> };

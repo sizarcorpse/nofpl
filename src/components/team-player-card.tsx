@@ -1,11 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Item, ItemContent, ItemMedia } from "@/components/ui/item";
+import { cn } from "@/libs/shadcn/utils";
 import { ELEMENT_TYPE, TEAMS } from "@/utils/data";
-import type { Element } from "@/utils/type";
+import type { TeamPlayer } from "@/utils/type";
 import Image from "next/image";
 
 interface TeamCardProps {
-  player: Element;
+  player: TeamPlayer;
 }
 
 const TeamPlayerCard = (props: TeamCardProps) => {
@@ -15,7 +16,13 @@ const TeamPlayerCard = (props: TeamCardProps) => {
   return (
     <Item className="py-2 px-2" size="sm" variant="muted">
       <ItemMedia>
-        <Avatar className="size-10">
+        <Avatar
+          className={cn(
+            "size-10",
+            player.pick.is_captain && "ring-3 ring-yellow-400",
+            player.pick.is_vice_captain && "ring-3 ring-gray-400"
+          )}
+        >
           <AvatarImage asChild src={image}>
             <Image
               src={image}

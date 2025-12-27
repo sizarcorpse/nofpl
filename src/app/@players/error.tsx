@@ -1,24 +1,13 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { ErrorDisplay } from "@/components/error-component";
+import type { ApiError } from "@/utils/db";
 
 export default function PlayerError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
+  error: (Error & { digest?: string }) | ApiError;
   reset: () => void;
 }) {
-  const getErrorMessage = () => {
-    if (error.digest) {
-      return `Error: ${error.message} (Digest: ${error.digest})`;
-    }
-  };
-
-  return (
-    <div>
-      <h2>Something went wrong!</h2>
-      <p>{getErrorMessage()}</p>
-      <Button onClick={() => reset()}>Try again</Button>
-    </div>
-  );
+  return <ErrorDisplay error={error} reset={reset} />;
 }
